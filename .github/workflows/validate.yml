@@ -1,0 +1,22 @@
+name: Validate OpenTofu
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        directory: [infra, platform, workloads]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.10.6
+      - run: tofu fmt -check -recursive
+      - run: tofu init -backend=false
+        working-directory: ${{ matrix.directory }}
+      - run: tofu validate
+        working-directory: ${{ matrix.directory }}
